@@ -397,41 +397,37 @@ class LockWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     def on_invisibility_fiducial_point_button(self):
         self.invisible_fiducial_points()
         self.fiducialVisibleButton.clicked.connect(LockWidget.update_button(self))
+        """
+          Calling the function update_button by clicking fiducialVisibleButton.
+        """
         self.fiducialVisibleButton.setCheckable(True)
-        """ Setting all three lock button icons to locked_icon."""
-    
+       
     def update_button(self):
-         count0=self.ASIS_R_layout.count()    
+         """
+           This function will set the icon of lock buttons to locked_icon.
+
+           Parameters:
+                    ASIS_R
+                    PT_L
+                    PT_R
+           Returns:
+                 None         
+         """
+         count0=self.ASIS_R_layout.count()
+         nodes = ["ASIS_R", "PT_L", "PT_R"] 
+         layout=[self.ASIS_R_layout,self.PT_L_layout,self.PT_R_layout]   
          for i in range(count0):
             if i==3:
-                node=slicer.util.getNode('ASIS_R')
-                node.SetLocked(True)
-                if node and not node.SetLocked(True):
-                 widget=self.ASIS_R_layout.itemAt(3).widget()
-                 widget.setIcon(Icons.locked_icon)
-                 widget.setChecked(True)
-                
+                j=0
+                for node in nodes:
+                 node=slicer.util.getNode(node)
+                 node.SetLocked(True)
+                 if node and not node.SetLocked(True):
+                  widget=layout[j].itemAt(3).widget()
+                  widget.setIcon(Icons.locked_icon)
+                  widget.setChecked(True)
+                 j=j+1 
               
-
-         count1=self.PT_L_layout.count()    
-         for i in range(count1):
-            if i==3:
-                node1=slicer.util.getNode('PT_L')
-                node1.SetLocked(True)
-                if node1 and not node1.SetLocked(True):
-                 widget=self.PT_L_layout.itemAt(3).widget()
-                 widget.setIcon(Icons.locked_icon)
-                 widget.setChecked(True)
-
-         count2=self.PT_R_layout.count()    
-         for i in range(count2):
-            if i==3:
-                node2=slicer.util.getNode('PT_R')
-                node2.SetLocked(True)
-                if node2 and not node2.SetLocked(True):
-                 widget=self.PT_R_layout.itemAt(3).widget()
-                 widget.setIcon(Icons.locked_icon)
-                 widget.setChecked(True) 
          
                     
     @staticmethod
