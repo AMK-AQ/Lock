@@ -169,7 +169,7 @@ class LockWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ASIS_R_layout, self.ASIS_R = self.create_layout(
             label_name="ASIS_R", tooltip_text="Anterior Superior Iliac Spine Right"
         )
-        self.PT_L_layout, self.PT_L = self.create_layout(
+        self.PT_L_layout, self.PT_L= self.create_layout(
             label_name="PT_L", tooltip_text="Pubic Tubercle Left"
         )
         self.PT_R_layout, self.PT_R = self.create_layout(
@@ -179,7 +179,7 @@ class LockWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.fiducialVisibleButton = Button(
             name="Visibility",
             callback=self.on_invisibility_fiducial_point_button,
-            is_checkable=True,
+            is_checkable=True
         )
         # self.transformButton = Button(
         #     name="Transform", callback=self.on_transform_button, is_checkable=True
@@ -208,37 +208,8 @@ class LockWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # Make sure parameter node is initialized (needed for module reload)
         self.initializeParameterNode()
 
-    def on_invisibility_fiducial_point_button(self):
-        self.invisible_fiducial_points()
-
-    @staticmethod
-    def invisible_fiducial_points():
-        """Toggle visibility of specified fiducial points in the scene.
-
-        The function gets a list of node names for fiducial points. It then checks if
-        each of these nodes exists in the current MRML scene. For every node that exists,
-        the visibility of the display node is toggled.
-
-        Parameters:
-            None
-
-        Returns:
-            None
-        """
-        # Define a list of fiducial point node names
-        nodes = ["ASIS_R", "PT_L", "PT_R"]
-
-        # Check if each node exists in the scene
-        nodes_exist = [
-            node
-            for node in nodes
-            if slicer.mrmlScene.GetFirstNodeByName(node) is not None
-        ]
-
-        # Toggle the visibility of each existing fiducial point node
-        for node in nodes_exist:
-            markups_node = slicer.util.getNode(node)
-            markups_node.SetDisplayVisibility(not markups_node.GetDisplayVisibility())
+    
+            
 
     def cleanup(self) -> None:
         """
@@ -381,7 +352,7 @@ class LockWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         lock_button = qt.QPushButton()
         lock_button.connect("clicked()", lambda: self.on_lock_button(label_name))
         lock_button.setCheckable(True)
-
+       
         # Check if node exists before entering the lock status loop
         try:
             node = slicer.util.getNode(label_name)
@@ -399,11 +370,13 @@ class LockWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             if node and node.GetLocked():
                 lock_button.setIcon(Icons.locked_icon)
                 lock_button.setChecked(True)
+          
+
             else:
                 lock_button.setIcon(Icons.unlocked_icon)
 
         lock_button.clicked.connect(change_icon)
-
+        
         return lock_button
 
     def on_lock_button(self, name: str) -> None:
@@ -419,7 +392,77 @@ class LockWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
         fiducial_node = slicer.util.getFirstNodeByName(name)
         fiducial_node.SetLocked(not fiducial_node.GetLocked())
+        
+       
+    def on_invisibility_fiducial_point_button(self):
+        self.invisible_fiducial_points()
+        self.fiducialVisibleButton.clicked.connect(LockWidget.update_button(self))
+        self.fiducialVisibleButton.setCheckable(True)
+        """ Setting all three lock button icons to locked_icon."""
+    
+    def update_button(self):
+         count0=self.ASIS_R_layout.count()    
+         for i in range(count0):
+            if i==3:
+                node=slicer.util.getNode('ASIS_R')
+                node.SetLocked(True)
+                if node and not node.SetLocked(True):
+                 widget=self.ASIS_R_layout.itemAt(3).widget()
+                 widget.setIcon(Icons.locked_icon)
+                 widget.setChecked(True)
+                
+              
 
+         count1=self.PT_L_layout.count()    
+         for i in range(count1):
+            if i==3:
+                node1=slicer.util.getNode('PT_L')
+                node1.SetLocked(True)
+                if node1 and not node1.SetLocked(True):
+                 widget=self.PT_L_layout.itemAt(3).widget()
+                 widget.setIcon(Icons.locked_icon)
+                 widget.setChecked(True)
+
+         count2=self.PT_R_layout.count()    
+         for i in range(count2):
+            if i==3:
+                node2=slicer.util.getNode('PT_R')
+                node2.SetLocked(True)
+                if node2 and not node2.SetLocked(True):
+                 widget=self.PT_R_layout.itemAt(3).widget()
+                 widget.setIcon(Icons.locked_icon)
+                 widget.setChecked(True) 
+         
+                    
+    @staticmethod
+    def invisible_fiducial_points():
+        """Toggle visibility of specified fiducial points in the scene.
+
+        The function gets a list of node names for fiducial points. It then checks if
+        each of these nodes exists in the current MRML scene. For every node that exists,
+        the visibility of the display node is toggled.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+        # Define a list of fiducial point node names
+        nodes = ["ASIS_R", "PT_L", "PT_R"]
+
+        # Check if each node exists in the scene
+        nodes_exist = [
+            node
+            for node in nodes
+            if slicer.mrmlScene.GetFirstNodeByName(node) is not None
+        ]
+
+        # Toggle the visibility of each existing fiducial point node
+        for node in nodes_exist:
+            markups_node = slicer.util.getNode(node)
+            markups_node.SetDisplayVisibility(not markups_node.GetDisplayVisibility())
+            markups_node.SetLocked(markups_node.GetLocked())
     def create_layout(
         self,
         label_name,
@@ -434,6 +477,7 @@ class LockWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         )
         jump_button = JumpButton(label_name)
         lock_button = LockButton(label_name)
+   
         layout = HBox(
             label, place_markup_button, jump_button, lock_button, node_selector
         )
@@ -442,8 +486,8 @@ class LockWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             node_selector,
             "setMRMLScene(vtkMRMLScene*)",
         )
-
-        return layout, node_selector  # , place_markup_button, lock_button
+     
+        return layout, node_selector
 
     def add_markup_node_with_name_and_class(
         self, name, node_class="vtkMRMLMarkupsFiducialNode", transform=None
@@ -464,7 +508,6 @@ class LockWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 transform_name="World_to_PelvicCS",
                 inverse_transform_name="World_to_PelvicCS_Inverse",
             )
-
 
 class NodeSelector:
     """
@@ -558,6 +601,7 @@ class Button(qt.QPushButton):
         if callback is not None:
             self.clicked.connect(callback)
             
+            
         self.setCheckable(is_checkable)
 
         if icon is not None:
@@ -611,7 +655,7 @@ class VBox(qt.QVBoxLayout):
         super().__init__()
         for layout in layouts:
             self.addLayout(layout)
-
+          
 class HBox(qt.QHBoxLayout):
     """
         Creates a QHBoxLayout object and adds each widget to it.
@@ -626,21 +670,24 @@ class HBox(qt.QHBoxLayout):
             hbox = create_hbox(button1, button2, button3)
     """
     def __init__(self, *widgets: qt.QWidget) -> qt.QHBoxLayout:
+        s=[]
         super().__init__()
         for widget in widgets:
             self.addWidget(widget)
+            
 
 class LockButton(qt.QPushButton):
     def __init__(self, name) -> None:
         super().__init__()
         self.setIcon(Icons.unlocked_icon)
         self.connect("clicked()", lambda: self.on_lock_button(name))
-        self.setCheckable(True)
- 
+        self.setCheckable(True) 
+
     def on_lock_button(self, name):
         try:
             self.toggle_state(name)
             self.change_icon(name)
+           
         except slicer.util.MRMLNodeNotFoundException:
             self.setIcon(Icons.unlocked_icon)      
 
@@ -650,8 +697,9 @@ class LockButton(qt.QPushButton):
             self.setIcon(Icons.locked_icon)
             self.setChecked(True)
         else:
-            self.setIcon(Icons.unlocked_icon)
-
+             self.setIcon(Icons.unlocked_icon)
+    
+     
     @staticmethod
     def toggle_state(name: str) -> None:
         """
@@ -665,7 +713,7 @@ class LockButton(qt.QPushButton):
             None
         """
         fiducial_node = slicer.util.getFirstNodeByName(name)
-        fiducial_node.SetLocked(not fiducial_node.GetLocked())
+        fiducial_node.SetLocked( not fiducial_node.GetLocked())
 
 
 class JumpLogic:
